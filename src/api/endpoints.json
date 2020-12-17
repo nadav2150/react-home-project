@@ -1,6 +1,0 @@
-{
-	"sendLoginDataApi": "https://test-api-server.herokuapp.com/login",
-	"allUsersApi": "https://test-api-server.herokuapp.com/users",
-	"getUsersDetailsApi": "https://test-api-server.herokuapp.com/users/:id",
-	"updateUserDetails": "https://test-api-server.herokuapp.com/users/:id"
-}
