@@ -46,13 +46,16 @@ export default function SignIn (){
 	const handleSubmit = async (event) => {
 		event.preventDefault();
 		alert('Submitted form!');
-		let t = await API.post('/login', {
-			firstName,
-			lastName,
-			password,
-		});
-		debugger;
-		history.push('/Home');
+		try {
+			let { data: userData } = await API.post('/login', {
+				firstName,
+				lastName,
+				password,
+			});
+			history.push('/Home');
+		} catch (err) {
+			alert(`error is ${err}`);
+		}
 	};
 	return (
 		<Container component='main' maxWidth='xs'>
