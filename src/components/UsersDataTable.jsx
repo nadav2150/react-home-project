@@ -4,6 +4,7 @@ import API from '../utils/API';
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
+import { useHistory } from 'react-router-dom';
 
 const filterParams = {
 	comparator        : function (filterLocalDateAtMidnight, cellValue){
@@ -36,14 +37,27 @@ function UsersDataTable (props){
 	const [ usersData, setUsersData ] = useState([]);
 	const [ gridApi, setGridApi ] = useState(null);
 	const [ gridColumnApi, setGridColumnApi ] = useState(null);
+	const history = useHistory();
+
+	const onSelectionChanged = () => {
+		let selectedRows = gridApi.getSelectedRows()[0];
+		const { id } = selectedRows;
+		history.push(`/edit/${id}`);
+		debugger;
+	};
 
 	const [ rowData, setRowData ] = useState([
 		{ make: 'Toyota', model: 'Celica', price: 35000 },
 		{ make: 'Ford', model: 'Mondeo', price: 32000 },
 		{ make: 'Porsche', model: 'Boxter', price: 72000 },
 	]);
+	function onGridReady (params){
+		setGridApi(params.api);
+		setGridColumnApi(params.columnApi);
+	}
+
 	useEffect(() => {
-		(async function anyNameFunction (){
+		(async function fetchUsersData (){
 			let { data } = await API.get('/users');
 			data.forEach((item) => (item.date = new Date(item.date).toDateString()));
 			setUsersData(data);
@@ -52,7 +66,11 @@ function UsersDataTable (props){
 	}, []);
 	return (
 		<div className='ag-theme-alpine' style={{ height: 400, width: 1000 }}>
-			<AgGridReact rowData={usersData}>
+			<AgGridReact
+				onGridReady={onGridReady}
+				rowSelection={'single'}
+				onSelectionChanged={onSelectionChanged}
+				rowData={usersData}>
 				<AgGridColumn field='id' sortable={true} filter='agNumberColumnFilter' />
 				<AgGridColumn field='firstName' sortable={true} filter />
 				<AgGridColumn field='lastName' sortable={true} filter />

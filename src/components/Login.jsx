@@ -45,7 +45,6 @@ export default function SignIn (){
 	};
 	const handleSubmit = async (event) => {
 		event.preventDefault();
-		alert('Submitted form!');
 		try {
 			let { data: userData } = await API.post('/login', {
 				firstName,
