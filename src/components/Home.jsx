@@ -1,6 +1,5 @@
 import React from 'react';
 import UsersDataTable from './UsersDataTable';
-import PropTypes from 'prop-types';
 
 function Home (props){
 	return (
@@ -9,7 +8,5 @@ function Home (props){
 		</div>
 	);
 }
-
-Home.propTypes = {};
 
 export default Home;

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import API from '../utils/API';
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
 import { useHistory } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import Filter from './Filter';
 
 const filterParams = {
 	comparator        : function (filterLocalDateAtMidnight, cellValue){
@@ -25,47 +26,43 @@ const filterParams = {
 	browserDatePicker : true,
 };
 
-const columns = [
-	{ field: 'id', headerName: 'ID', width: 200 },
-	{ field: 'firstName', headerName: 'NAME', width: 200 },
-	{ field: 'lastName', headerName: 'LAST NAME', width: 200 },
-	{ field: 'date', headerName: 'DATE', width: 200 },
-	{ field: 'phone', headerName: 'PHONE', width: 200 },
-];
-
 function UsersDataTable (props){
-	const [ usersData, setUsersData ] = useState([]);
+	const userDataFiltered = useSelector((state) => state.userDataFiltered);
+	const history = useHistory();
+	const dispatch = useDispatch();
+	const [ usersData, setUsersData ] = useState(userDataFiltered);
 	const [ gridApi, setGridApi ] = useState(null);
 	const [ gridColumnApi, setGridColumnApi ] = useState(null);
-	const history = useHistory();
 
 	const onSelectionChanged = () => {
 		let selectedRows = gridApi.getSelectedRows()[0];
 		const { id } = selectedRows;
 		history.push(`/edit/${id}`);
-		debugger;
 	};
-
-	const [ rowData, setRowData ] = useState([
-		{ make: 'Toyota', model: 'Celica', price: 35000 },
-		{ make: 'Ford', model: 'Mondeo', price: 32000 },
-		{ make: 'Porsche', model: 'Boxter', price: 72000 },
-	]);
 	function onGridReady (params){
 		setGridApi(params.api);
 		setGridColumnApi(params.columnApi);
 	}
 
+	useEffect(
+		() => {
+			setUsersData(userDataFiltered);
+		},
+		[ userDataFiltered ]
+	);
+
 	useEffect(() => {
 		(async function fetchUsersData (){
 			let { data } = await API.get('/users');
 			data.forEach((item) => (item.date = new Date(item.date).toDateString()));
+			dispatch({ type: 'update', value: data });
 			setUsersData(data);
 		})();
 		return () => {};
 	}, []);
 	return (
 		<div className='ag-theme-alpine' style={{ height: 400, width: 1000 }}>
+			<Filter />
 			<AgGridReact
 				onGridReady={onGridReady}
 				rowSelection={'single'}
@@ -80,7 +77,4 @@ function UsersDataTable (props){
 		</div>
 	);
 }
-
-UsersDataTable.propTypes = {};
-
 export default UsersDataTable;
