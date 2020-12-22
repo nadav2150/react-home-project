@@ -14,7 +14,7 @@ function UsersDataTable (props){
 	const dispatch = useDispatch();
 	const [ usersData, setUsersData ] = useState(userDataFiltered);
 	const [ gridApi, setGridApi ] = useState(null);
-	const [ gridColumnApi, setGridColumnApi ] = useState(null);
+	const [ , setGridColumnApi ] = useState(null);
 
 	const onSelectionChanged = () => {
 		let selectedRows = gridApi.getSelectedRows()[0];
