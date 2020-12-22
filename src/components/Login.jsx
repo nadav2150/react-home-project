@@ -4,13 +4,13 @@ import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Alert from '@material-ui/lab/Alert';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { useHistory } from 'react-router-dom';
 import API from '../utils/API';
 import { useForm, Controller } from 'react-hook-form';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const useStyles = makeStyles((theme) => ({
 	paper  : {
@@ -33,24 +33,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function SignIn (){
-	const { control, errors: fieldsErrors, handleSubmit, register } = useForm();
+	const { control, errors: fieldsErrors, handleSubmit } = useForm();
+	const [ isLoading, setIsLoading ] = useState(false);
 	const classes = useStyles();
 	const history = useHistory();
-	const [ emailIsValid, setEmailIsValid ] = useState(false);
-	const [ email, setEmail ] = useState(false);
-	const [ firstName, setFirstName ] = useState('');
-	const [ lastName, setLastName ] = useState('');
-	const [ password, setPassword ] = useState('');
-	const [ errMessage, setErrMessage ] = useState('Please Fill All Field Correctly');
-	const [ isErrMessage, setIsErrMessage ] = useState(false);
-	const ValidateEmail = (email) => {
-		if (/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(email)) {
-			setEmail(email);
-			return setEmailIsValid(true);
-		}
-		return setEmailIsValid(false);
-	};
 	const onSubmitLogin = async (data) => {
+		setIsLoading(true);
 		let { firstName, lastName, password } = data;
 		try {
 			await API.post('/login', {
@@ -59,6 +47,7 @@ export default function SignIn (){
 				password,
 			});
 			history.push('/Home');
+			setIsLoading(true);
 		} catch (err) {
 			alert(`error is ${err}`);
 		}
@@ -153,10 +142,16 @@ export default function SignIn (){
 						defaultValue=''
 						rules={{ required: true }}
 					/>
-					<Button type='submit' fullWidth variant='contained' color='primary' className={classes.submit}>
+					<Button
+						type='submit'
+						fullWidth
+						variant='contained'
+						color='primary'
+						className={classes.submit}
+						disabled={isLoading ? true : false}>
 						Sign In
 					</Button>
-					{isErrMessage ? <Alert severity='error'>{errMessage}</Alert> : null}
+					{isLoading ? <CircularProgress /> : null}
 				</form>
 			</div>
 		</Container>
