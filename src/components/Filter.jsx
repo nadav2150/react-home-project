@@ -7,7 +7,7 @@ function Filter (){
 	const dispatch = useDispatch();
 	const searchInput = (searchText) => {
 		const searchResult = allUserData.filter((item, key) => {
-			if (JSON.stringify(item).includes(searchText)) {
+			if (JSON.stringify(item).toLowerCase().includes(searchText.toLowerCase())) {
 				return item;
 			}
 		});

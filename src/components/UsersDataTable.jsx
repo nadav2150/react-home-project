@@ -3,12 +3,76 @@ import API from '../utils/API';
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
+import { ClientSideRowModelModule } from '@ag-grid-community/client-side-row-model';
 import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Filter from './Filter';
 
-const filterParams = {
+function UsersDataTable (props){
+	const userDataFiltered = useSelector((state) => state.userDataFiltered);
+	const history = useHistory();
+	const dispatch = useDispatch();
+	const [ usersData, setUsersData ] = useState(userDataFiltered);
+	const [ gridApi, setGridApi ] = useState(null);
+	const [ gridColumnApi, setGridColumnApi ] = useState(null);
+
+	const onSelectionChanged = () => {
+		let selectedRows = gridApi.getSelectedRows()[0];
+		const { id } = selectedRows;
+		history.push(`/edit/${id}`);
+	};
+	async function onGridReady (params){
+		setGridApi(params.api);
+		setGridColumnApi(params.columnApi);
+		let { data } = await API.get('/users');
+		data.forEach((item) => (item.date = getFormattedDate(new Date(item.date))));
+		dispatch({ type: 'update', value: data });
+		setUsersData(data);
+	}
+	function getFormattedDate (date){
+		var year = date.getFullYear();
+
+		var month = (1 + date.getMonth()).toString();
+		month = month.length > 1 ? month : '0' + month;
+
+		var day = date.getDate().toString();
+		day = day.length > 1 ? day : '0' + day;
+
+		return month + '/' + day + '/' + year;
+	}
+
+	useEffect(
+		() => {
+			setUsersData(userDataFiltered);
+		},
+		[ userDataFiltered ]
+	);
+	return (
+		<div className='ag-theme-alpine' style={{ height: 400, width: 1000 }}>
+			<Filter />
+			<AgGridReact
+				defaultColDef={{
+					flex     : 1,
+					minWidth : 150,
+					filter   : true,
+				}}
+				modules={[ ClientSideRowModelModule ]}
+				onGridReady={onGridReady}
+				rowSelection={'single'}
+				onSelectionChanged={onSelectionChanged}
+				rowData={usersData}>
+				<AgGridColumn field='id' sortable={true} filter='agNumberColumnFilter' />
+				<AgGridColumn field='firstName' sortable={true} />
+				<AgGridColumn field='lastName' sortable={true} />
+				<AgGridColumn field='date' sortable={true} filter='agDateColumnFilter' filterParams={filterParams} />
+				<AgGridColumn field='phone' sortable={true} />
+			</AgGridReact>
+		</div>
+	);
+}
+var filterParams = {
 	comparator        : function (filterLocalDateAtMidnight, cellValue){
+		debugger;
 		var dateAsString = cellValue;
 		if (dateAsString == null) return -1;
 		var dateParts = dateAsString.split('/');
@@ -24,57 +88,6 @@ const filterParams = {
 		}
 	},
 	browserDatePicker : true,
+	minValidYear      : 2000,
 };
-
-function UsersDataTable (props){
-	const userDataFiltered = useSelector((state) => state.userDataFiltered);
-	const history = useHistory();
-	const dispatch = useDispatch();
-	const [ usersData, setUsersData ] = useState(userDataFiltered);
-	const [ gridApi, setGridApi ] = useState(null);
-	const [ gridColumnApi, setGridColumnApi ] = useState(null);
-
-	const onSelectionChanged = () => {
-		let selectedRows = gridApi.getSelectedRows()[0];
-		const { id } = selectedRows;
-		history.push(`/edit/${id}`);
-	};
-	function onGridReady (params){
-		setGridApi(params.api);
-		setGridColumnApi(params.columnApi);
-	}
-
-	useEffect(
-		() => {
-			setUsersData(userDataFiltered);
-		},
-		[ userDataFiltered ]
-	);
-
-	useEffect(() => {
-		(async function fetchUsersData (){
-			let { data } = await API.get('/users');
-			data.forEach((item) => (item.date = new Date(item.date).toDateString()));
-			dispatch({ type: 'update', value: data });
-			setUsersData(data);
-		})();
-		return () => {};
-	}, []);
-	return (
-		<div className='ag-theme-alpine' style={{ height: 400, width: 1000 }}>
-			<Filter />
-			<AgGridReact
-				onGridReady={onGridReady}
-				rowSelection={'single'}
-				onSelectionChanged={onSelectionChanged}
-				rowData={usersData}>
-				<AgGridColumn field='id' sortable={true} filter='agNumberColumnFilter' />
-				<AgGridColumn field='firstName' sortable={true} filter />
-				<AgGridColumn field='lastName' sortable={true} filter />
-				<AgGridColumn field='date' sortable={true} filter='agDateColumnFilter' filterParams={filterParams} />
-				<AgGridColumn field='phone' sortable={true} filter />
-			</AgGridReact>
-		</div>
-	);
-}
 export default UsersDataTable;
