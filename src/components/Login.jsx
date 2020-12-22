@@ -10,6 +10,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { useHistory } from 'react-router-dom';
 import API from '../utils/API';
+import { useForm, Controller } from 'react-hook-form';
 
 const useStyles = makeStyles((theme) => ({
 	paper  : {
@@ -32,6 +33,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function SignIn (){
+	const { control, errors: fieldsErrors, handleSubmit, register } = useForm();
 	const classes = useStyles();
 	const history = useHistory();
 	const [ emailIsValid, setEmailIsValid ] = useState(false);
@@ -48,21 +50,17 @@ export default function SignIn (){
 		}
 		return setEmailIsValid(false);
 	};
-	const handleSubmit = async (event) => {
-		if (!emailIsValid || firstName === '' || lastName === '' || password === '') {
-			setIsErrMessage(true);
-		} else {
-			event.preventDefault();
-			try {
-				await API.post('/login', {
-					firstName,
-					lastName,
-					password,
-				});
-				history.push('/Home');
-			} catch (err) {
-				alert(`error is ${err}`);
-			}
+	const onSubmitLogin = async (data) => {
+		let { firstName, lastName, password } = data;
+		try {
+			await API.post('/login', {
+				firstName,
+				lastName,
+				password,
+			});
+			history.push('/Home');
+		} catch (err) {
+			alert(`error is ${err}`);
 		}
 	};
 	return (
@@ -75,63 +73,87 @@ export default function SignIn (){
 				<Typography component='h1' variant='h5'>
 					Sign in
 				</Typography>
-				<form className={classes.form} noValidate onSubmit={(e) => handleSubmit(e)}>
-					<TextField
-						error={!emailIsValid}
-						variant='outlined'
-						margin='normal'
-						fullWidth
-						id='email'
-						label='Email Address'
+				<form className={classes.form} noValidate onSubmit={handleSubmit(onSubmitLogin)}>
+					<Controller
 						name='email'
-						autoComplete='email'
-						autoFocus
-						onChange={(event) => ValidateEmail(event.target.value)}
+						as={
+							<TextField
+								error={fieldsErrors.email}
+								variant='outlined'
+								margin='normal'
+								fullWidth
+								required
+								label='Email Address'
+								autoComplete='email'
+								autoFocus
+							/>
+						}
+						control={control}
+						defaultValue=''
+						rules={{
+							required : true,
+							pattern  : {
+								value   : /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+								message : 'invalid email address',
+							},
+						}}
 					/>
-					<TextField
-						error={!firstName}
-						variant='outlined'
-						margin='normal'
-						required
-						fullWidth
-						id='Fname'
-						label='First Name'
-						name='Fname'
-						autoFocus
-						onChange={(event) => setFirstName(event.target.value)}
+					<Controller
+						name='firstName'
+						as={
+							<TextField
+								error={fieldsErrors.firstName}
+								variant='outlined'
+								margin='normal'
+								required
+								fullWidth
+								label='First Name'
+								autoFocus
+							/>
+						}
+						control={control}
+						defaultValue=''
+						rules={{ required: true }}
 					/>
-					<TextField
-						error={!lastName}
-						variant='outlined'
-						margin='normal'
-						required
-						fullWidth
-						id='Lname'
-						label='Last Name'
-						name='Lname'
-						autoFocus
-						onChange={(event) => setLastName(event.target.value)}
+
+					<Controller
+						name='lastName'
+						as={
+							<TextField
+								error={fieldsErrors.lastName}
+								variant='outlined'
+								margin='normal'
+								required
+								fullWidth
+								label='Last Name'
+								autoFocus
+							/>
+						}
+						control={control}
+						defaultValue=''
+						rules={{ required: true }}
 					/>
-					<TextField
-						error={!password}
-						variant='outlined'
-						margin='normal'
-						required
-						fullWidth
+
+					<Controller
 						name='password'
-						label='Password'
-						type='password'
-						id='password'
-						autoComplete='current-password'
-						onChange={(event) => setPassword(event.target.value)}
+						as={
+							<TextField
+								error={fieldsErrors.password}
+								variant='outlined'
+								margin='normal'
+								required
+								fullWidth
+								name='password'
+								label='Password'
+								type='password'
+								autoComplete='current-password'
+							/>
+						}
+						control={control}
+						defaultValue=''
+						rules={{ required: true }}
 					/>
-					<Button
-						type='button'
-						onClick={(e) => handleSubmit(e)}
-						fullWidth
-						variant='contained'
-						color='primary'
-						className={classes.submit}>
+					<Button type='submit' fullWidth variant='contained' color='primary' className={classes.submit}>
 						Sign In
 					</Button>
 					{isErrMessage ? <Alert severity='error'>{errMessage}</Alert> : null}
