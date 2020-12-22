@@ -72,7 +72,6 @@ function UsersDataTable (props){
 }
 var filterParams = {
 	comparator        : function (filterLocalDateAtMidnight, cellValue){
-		debugger;
 		var dateAsString = cellValue;
 		if (dateAsString == null) return -1;
 		var dateParts = dateAsString.split('/');
