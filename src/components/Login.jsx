@@ -47,7 +47,7 @@ export default function SignIn (){
 				password,
 			});
 			history.push('/Home');
-			setIsLoading(true);
+			setIsLoading(false);
 		} catch (err) {
 			alert(`error is ${err}`);
 		}
