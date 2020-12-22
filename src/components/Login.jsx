@@ -4,6 +4,7 @@ import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import Alert from '@material-ui/lab/Alert';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
@@ -22,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 		backgroundColor : theme.palette.secondary.main,
 	},
 	form   : {
-		width     : '100%', // Fix IE 11 issue.
+		width     : '100%',
 		marginTop : theme.spacing(1),
 	},
 	submit : {
@@ -34,26 +35,34 @@ export default function SignIn (){
 	const classes = useStyles();
 	const history = useHistory();
 	const [ emailIsValid, setEmailIsValid ] = useState(false);
+	const [ email, setEmail ] = useState(false);
 	const [ firstName, setFirstName ] = useState('');
 	const [ lastName, setLastName ] = useState('');
 	const [ password, setPassword ] = useState('');
+	const [ errMessage, setErrMessage ] = useState('Please Fill All Field Correctly');
+	const [ isErrMessage, setIsErrMessage ] = useState(false);
 	const ValidateEmail = (email) => {
 		if (/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(email)) {
+			setEmail(email);
 			return setEmailIsValid(true);
 		}
 		return setEmailIsValid(false);
 	};
 	const handleSubmit = async (event) => {
-		event.preventDefault();
-		try {
-			let { data: userData } = await API.post('/login', {
-				firstName,
-				lastName,
-				password,
-			});
-			history.push('/Home');
-		} catch (err) {
-			alert(`error is ${err}`);
+		if (!emailIsValid || firstName === '' || lastName === '' || password === '') {
+			setIsErrMessage(true);
+		} else {
+			event.preventDefault();
+			try {
+				await API.post('/login', {
+					firstName,
+					lastName,
+					password,
+				});
+				history.push('/Home');
+			} catch (err) {
+				alert(`error is ${err}`);
+			}
 		}
 	};
 	return (
@@ -116,9 +125,16 @@ export default function SignIn (){
 						autoComplete='current-password'
 						onChange={(event) => setPassword(event.target.value)}
 					/>
-					<Button type='submit' fullWidth variant='contained' color='primary' className={classes.submit}>
+					<Button
+						type='button'
+						onClick={(e) => handleSubmit(e)}
+						fullWidth
+						variant='contained'
+						color='primary'
+						className={classes.submit}>
 						Sign In
 					</Button>
+					{isErrMessage ? <Alert severity='error'>{errMessage}</Alert> : null}
 				</form>
 			</div>
 		</Container>
