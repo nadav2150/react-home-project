@@ -30,6 +30,7 @@ function Edit (){
 	return (
 		<div>
 			<Box display='flex' alignItems='center' flexDirection='column'>
+				<h1>Edit Page</h1>
 				<Box display='flex' width='100%' flexDirection='column' alignItems='center' justifyContent>
 					{Object.keys(userData).map((key, index) => {
 						if (key !== 'id') {
