@@ -2,10 +2,14 @@
 this project build in react with hooks and Redux as state management
 the app have three pages
 
-### Login:
+### Login Page
 
+![](/assets/Screenshots/Login.png)
 
-### Data Table:
+### Home Page
 
+![](/assets/Screenshots/Home.png)
 
 ### Edit page
+
+![](/assets/Screenshots/Edit.png)
