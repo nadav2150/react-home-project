@@ -2,10 +2,10 @@
 this project build in react with hooks and Redux as state management
 the app have three pages
 
-##Login:
+### Login:
 
 
-##Data Table:
+### Data Table:
 
 
-##Edit page
+### Edit page
